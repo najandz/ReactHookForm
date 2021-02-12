@@ -1,15 +1,44 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useForm } from "react-hook-form";
+import { useDropzone } from "react-dropzone";
 
 import "./styles.css";
+import * as S from "./styles";
 
 function App() {
-  const { register, errors, handleSubmit } = useForm({
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [submitedString, setSubmitedString] = useState("");
+
+  const { register, errors, handleSubmit, setValue } = useForm({
     mode: "onBlur"
   });
+  const {
+    acceptedFiles,
+    getRootProps,
+    getInputProps,
+    isDragAccept
+  } = useDropzone({
+    multiple: false,
+    accept: "image/jpeg, image/png",
+    maxFiles: 1,
+    maxSize: 5242880,
+    onDrop: (files) => {
+      setValue("file", files);
+    }
+  });
+
+  useEffect(() => {
+    register({ name: "file" }, { required: true });
+  }, [register]);
+
+  useEffect(() => {
+    setSelectedFile(acceptedFiles[0]);
+  }, [acceptedFiles]);
+
   const onSubmit = (data) => {
     alert(JSON.stringify(data));
+    setSubmitedString(JSON.stringify(data));
   };
 
   return (
@@ -101,6 +130,46 @@ function App() {
           />
         </div>
         <div>
+          <>
+            <label htmlFor="file">
+              Certification or proof of employment document:
+              {errors.file && (
+                <span role="alert" className="spanError">
+                  This is required
+                </span>
+              )}
+            </label>
+            <S.Dropzone
+              isDragAccept={isDragAccept}
+              {...getRootProps({ onClick: (e) => e.preventDefault() })}
+            >
+              <p>Drag 'n' drop file here, or click to select file</p>
+              {/* <Controller
+                as={<input />}
+                type="file"
+                name="file"
+                control={control}
+                {...getInputProps()}
+              /> */}
+              <input
+                type="file"
+                name="file"
+                // onChange={e => changeFile(e)}
+                {...getInputProps()}
+              />
+              <S.SelectedFileContainer>
+                <S.SelectedFile onClick={() => setSelectedFile(null)}>
+                  {selectedFile ? selectedFile.path : "no file attached"}
+                </S.SelectedFile>
+              </S.SelectedFileContainer>
+              <div style={{ textAlign: " center" }}>
+                <p>Valid extensions are: jpg, jpeg, tif, tiff, png, pdf.</p>
+                <p>Maximum size is: 5 Mb.</p>
+              </div>
+            </S.Dropzone>
+          </>
+        </div>
+        <div>
           <label htmlFor="language" className="form_label">
             Language:
             {errors.language && (
@@ -113,9 +182,6 @@ function App() {
               required: "select one option"
             })}
           >
-            <option value="" disabled selected>
-              Select your language
-            </option>
             <option value="en">English</option>
             <option value="fr">French</option>
           </select>
@@ -138,7 +204,14 @@ function App() {
             Type of User:
             {errors.User && <span className="spanError">This is required</span>}
           </label>
-          <div style={{ color: "white", display: "inline-flex", gap: "1rem" }}>
+          <div
+            style={{
+              color: "white",
+              display: "inline-flex",
+              gap: "1rem",
+              alignItems: "center"
+            }}
+          >
             <input
               name="User"
               type="radio"
@@ -157,6 +230,7 @@ function App() {
         </div>
         <input type="submit" />
       </form>
+      <p style={{ marginTop: "30px" }}>{submitedString}</p>
     </div>
   );
 }
