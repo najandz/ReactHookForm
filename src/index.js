@@ -22,13 +22,17 @@ function App() {
               <span className="spanError">First Name is required</span>
             )}
           </label>
-
-          <input
-            name="firstName"
-            placeholder="bill"
-            ref={register({ required: true })}
-            className={errors.firstName ? "error" : "valid"}
-          />
+          <div
+            className={`div ${errors.firstName ? "error" : ""} ${
+              !errors.firstName ? "valid" : ""
+            }`}
+          >
+            <input
+              name="firstName"
+              placeholder="bill"
+              ref={register({ required: true })}
+            />
+          </div>
         </div>
 
         <div>
