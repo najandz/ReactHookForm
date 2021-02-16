@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
+import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
+import { ValidatePassword } from "./passwordStrength";
 
 import "./styles.css";
 import * as S from "./styles";
@@ -10,9 +12,16 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [submitedString, setSubmitedString] = useState("");
 
-  const { register, errors, handleSubmit, setValue } = useForm({
-    mode: "onBlur"
+  const { register, errors, watch, handleSubmit, setValue } = useForm({
+    mode: "onBlur",
+    defaultValues: {
+      password: ""
+    }
   });
+  const password = watch("password");
+  const passwordStrength = useMemo(() => ValidatePassword(password), [
+    password
+  ]);
   const {
     acceptedFiles,
     getRootProps,
@@ -36,10 +45,10 @@ function App() {
     setSelectedFile(acceptedFiles[0]);
   }, [acceptedFiles]);
 
-  const onSubmit = (data) => {
+  const onSubmit = useCallback((data) => {
     alert(JSON.stringify(data));
     setSubmitedString(JSON.stringify(data));
-  };
+  }, []);
 
   return (
     <div className="App">
@@ -128,6 +137,29 @@ function App() {
             type="email"
             placeholder="example@mail.com"
           />
+        </div>
+        <div>
+          <label htmlFor="password">
+            Password:
+            {errors.password && (
+              <span role="alert" className="spanError">
+                {errors.password.message}
+              </span>
+            )}
+          </label>
+
+          <input
+            name="password"
+            type="password"
+            ref={register({
+              required: "Password is required",
+              pattern: {
+                value: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,15}$/,
+                message: "Follow the password structure."
+              }
+            })}
+          />
+          <PasswordStrengthIndicator passwordStrength={passwordStrength} />
         </div>
         <div>
           <>
