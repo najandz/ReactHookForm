@@ -6,7 +6,7 @@ export const Dropzone = styled.label`
   height: 180px;
   max-height: 180px;
   flex-direction: column;
-  width: 100%;
+
   justify-content: space-around;
   color: #707070;
   border: 1px dashed #bdbdbd;
